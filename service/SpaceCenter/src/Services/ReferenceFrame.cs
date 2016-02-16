@@ -292,12 +292,12 @@ namespace KRPC.SpaceCenter.Services
                     {
                         var up = UpNotNormalized;
                         var radial = body.referenceBody.position - body.position;
-                        return Vector3d.Cross (radial, up);
+                        return Vector3d.Cross (up, radial);
                     }
                 case Type.Vessel:
                     return vessel.ReferenceTransform.forward;
                 case Type.VesselOrbital:
-                    return vessel.GetOrbit ().GetOrbitNormal ().SwapYZ ();
+                    return -vessel.GetOrbit ().GetOrbitNormal ().SwapYZ ();
                 case Type.VesselSurface:
                     {
                         var right = vessel.GetWorldPos3D () - vessel.mainBody.position;
