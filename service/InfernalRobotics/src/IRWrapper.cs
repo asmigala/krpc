@@ -1,5 +1,4 @@
 #pragma warning disable 1591
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -118,7 +117,7 @@ namespace KRPC.InfernalRobotics
             }
 
             LogFormatted ("Got Instance, Creating Wrapper Objects");
-            IRController = new InfernalRoboticsAPI (ActualServoController);
+            IRController = new InfernalRoboticsAPI ();
             isWrapped = true;
             return true;
         }
@@ -130,21 +129,21 @@ namespace KRPC.InfernalRobotics
             private PropertyInfo apiReady;
             private object actualServoGroups;
 
-            public InfernalRoboticsAPI (object irServoController)
+            public InfernalRoboticsAPI ()
             {
                 DetermineReady ();
-                BuildServoGroups (irServoController);
+                BuildServoGroups ();
             }
 
-            private void BuildServoGroups (object irServoController)
+            private void BuildServoGroups ()
             {
-                LogFormatted ("Getting ServoGroups Object");
                 var servoGroupsField = IRServoControllerType.GetField ("ServoGroups");
                 if (servoGroupsField == null)
                     LogFormatted ("Failed Getting ServoGroups fieldinfo");
-                else {
-                    actualServoGroups = servoGroupsField.GetValue (irServoController);
-                    LogFormatted ("Success: " + (actualServoGroups != null));
+                else if (IRWrapper.ActualServoController == null) {
+                    LogFormatted ("ServoController Instance not found");
+                } else {
+                    actualServoGroups = servoGroupsField.GetValue (IRWrapper.ActualServoController);
                 }
             }
 
@@ -157,7 +156,7 @@ namespace KRPC.InfernalRobotics
 
             public bool Ready {
                 get {
-                    if (apiReady == null)
+                    if (apiReady == null || actualServoGroups == null)
                         return false;
 
                     return (bool)apiReady.GetValue (null, null);
@@ -166,6 +165,7 @@ namespace KRPC.InfernalRobotics
 
             public IList<IControlGroup> ServoGroups {
                 get {
+                    BuildServoGroups ();
                     return ExtractServoGroups (actualServoGroups);
                 }
             }
